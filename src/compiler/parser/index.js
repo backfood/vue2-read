@@ -49,9 +49,9 @@ export function createASTElement (
 ): ASTElement {
   return {
     type: 1,
-    tag,
-    attrsList: attrs,
-    attrsMap: makeAttrsMap(attrs),
+    tag, // div span
+    attrsList: attrs, // 属性的数组对象表示 [{name:'id',value:'app'}]
+    attrsMap: makeAttrsMap(attrs), // {id:'app',class:'hd'}
     parent,
     children: []
   }
@@ -70,6 +70,9 @@ export function parse (
   platformMustUseProp = options.mustUseProp || no
   platformGetTagNamespace = options.getTagNamespace || no
 
+  /**
+   * 三个函数，分别处理 clss表达式、style表达式、v-model表达式
+   */
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
@@ -353,6 +356,7 @@ export function processFor (el: ASTElement) {
       )
       return
     }
+    console.log(inMatch,'匹配到的')
     el.for = inMatch[2].trim()
     const alias = inMatch[1].trim()
     const iteratorMatch = alias.match(forIteratorRE)

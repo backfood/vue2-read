@@ -61,7 +61,12 @@ Vue.prototype.$mount = function (
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
-
+      /**
+       * template 模板字符串
+       * shouldDecodeNewlines 非ie为false
+       * delimiters 分界符
+       * comments 注释
+       */
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
         delimiters: options.delimiters,

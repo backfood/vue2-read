@@ -62,6 +62,7 @@ export function parseHTML (html, options) {
   let last, lastTag
   while (html) {
     last = html
+    // console.log(last)
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf('<')
@@ -97,6 +98,7 @@ export function parseHTML (html, options) {
         }
 
         // End tag:
+        // endTag reg 当前字符串是否是尾标签
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -120,10 +122,10 @@ export function parseHTML (html, options) {
       if (textEnd >= 0) {
         rest = html.slice(textEnd)
         while (
-          !endTag.test(rest) &&
-          !startTagOpen.test(rest) &&
-          !comment.test(rest) &&
-          !conditionalComment.test(rest)
+          !endTag.test(rest) && // 不是结束标签
+          !startTagOpen.test(rest) && // 不是开放标签
+          !comment.test(rest) && // 不是注释标签
+          !conditionalComment.test(rest) // 不是适配注释
         ) {
           // < in plain text, be forgiving and treat it as text
           next = rest.indexOf('<', 1)
@@ -186,6 +188,7 @@ export function parseHTML (html, options) {
 
   function parseStartTag () {
     const start = html.match(startTagOpen)
+    // console.log(start, ' parseStartTag 匹配到的开始标签 ')
     if (start) {
       const match = {
         tagName: start[1],
@@ -194,14 +197,19 @@ export function parseHTML (html, options) {
       }
       advance(start[0].length)
       let end, attr
+      // console.log(html, '越过之前的inde')
+      // end 开始标签的结束位置
       while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
         advance(attr[0].length)
         match.attrs.push(attr)
       }
+
       if (end) {
+        // console.log(end, '匹配到的end')
         match.unarySlash = end[1]
         advance(end[0].length)
         match.end = index
+        // console.log(match, 'match 匹配到的标签结构')
         return match
       }
     }
@@ -210,7 +218,8 @@ export function parseHTML (html, options) {
   function handleStartTag (match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
-
+    // console.log(expectHTML, 'expectHTML')
+    // expectHTML true
     if (expectHTML) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag)
@@ -228,11 +237,13 @@ export function parseHTML (html, options) {
       const args = match.attrs[i]
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
+        // args[3] => 'id'，args[4] => '='，args[5] => 'app'
         if (args[3] === '') { delete args[3] }
         if (args[4] === '') { delete args[4] }
         if (args[5] === '') { delete args[5] }
       }
       const value = args[3] || args[4] || args[5] || ''
+      // attrs[i] = [{name:'id',value:'app'},{name:'class',value:'hd'}]
       attrs[i] = {
         name: args[1],
         value: decodeAttr(
@@ -248,8 +259,15 @@ export function parseHTML (html, options) {
     }
 
     if (options.start) {
+      /**
+       * tagName div span……
+       * attrs  [{name:'id',value:'app'},{name:'class',value:'hd'}]
+       * unary 单标签
+       */
+      // console.log(attrs, ' 开始标签的属性的数据结构 ')
       options.start(tagName, attrs, unary, match.start, match.end)
     }
+    // console.log(JSON.stringify(stack))
   }
 
   function parseEndTag (tagName, start, end) {
@@ -263,6 +281,7 @@ export function parseHTML (html, options) {
 
     // Find the closest opened tag of the same type
     if (tagName) {
+      console.log(JSON.stringify(stack), '处理endtag函数')
       for (pos = stack.length - 1; pos >= 0; pos--) {
         if (stack[pos].lowerCasedTag === lowerCasedTagName) {
           break

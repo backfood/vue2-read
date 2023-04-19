@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.5.0
- * (c) 2014-2017 Evan You
+ * (c) 2014-2023 Evan You
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -610,7 +610,6 @@ function logError (err, vm, info) {
 /*  */
 /* globals MessageChannel */
 
-// can we use __proto__?
 var hasProto = '__proto__' in {};
 
 // Browser environment sniffing
@@ -812,9 +811,6 @@ Dep.prototype.notify = function notify () {
   }
 };
 
-// the current target watcher being evaluated.
-// this is globally unique because there could be only one
-// watcher being evaluated at any time.
 Dep.target = null;
 var targetStack = [];
 
@@ -1204,11 +1200,6 @@ function dependArray (value) {
 
 /*  */
 
-/**
- * Option overwriting strategies are functions that handle
- * how to merge a parent option value and a child option
- * value into the final value.
- */
 var strats = config.optionMergeStrategies;
 
 /**
@@ -2053,18 +2044,6 @@ function checkProp (
 
 /*  */
 
-// The template compiler attempts to minimize the need for normalization by
-// statically analyzing the template at compile time.
-//
-// For plain HTML markup, normalization can be completely skipped because the
-// generated render function is guaranteed to return Array<VNode>. There are
-// two cases where extra normalization is needed:
-
-// 1. When the children contains components - because a functional component
-// may return an Array instead of a single root. In this case, just a simple
-// normalization is needed - if any child is an Array, we flatten the whole
-// thing with Array.prototype.concat. It is guaranteed to be only 1-level deep
-// because functional components already normalize their own children.
 function simpleNormalizeChildren (children) {
   for (var i = 0; i < children.length; i++) {
     if (Array.isArray(children[i])) {
@@ -3143,11 +3122,6 @@ Watcher.prototype.teardown = function teardown () {
   }
 };
 
-/**
- * Recursively traverse an object to evoke all converted
- * getters, so that every nested property inside the object
- * is collected as a "deep" dependency.
- */
 var seenObjects = new _Set();
 function traverse (val) {
   seenObjects.clear();
@@ -3574,9 +3548,6 @@ function resolveInject (inject, vm) {
 
 /*  */
 
-/**
- * Runtime helper for rendering v-for lists.
- */
 function renderList (
   val,
   render
@@ -3608,9 +3579,6 @@ function renderList (
 
 /*  */
 
-/**
- * Runtime helper for rendering <slot>
- */
 function renderSlot (
   name,
   fallback,
@@ -3647,20 +3615,12 @@ function renderSlot (
 
 /*  */
 
-/**
- * Runtime helper for resolving filters
- */
 function resolveFilter (id) {
   return resolveAsset(this.$options, 'filters', id, true) || identity
 }
 
 /*  */
 
-/**
- * Runtime helper for checking keyCodes from config.
- * exposed as Vue.prototype._k
- * passing in eventKeyName as last argument separately for backwards compat
- */
 function checkKeyCodes (
   eventKeyCode,
   key,
@@ -3681,9 +3641,6 @@ function checkKeyCodes (
 
 /*  */
 
-/**
- * Runtime helper for merging v-bind="object" into a VNode's data.
- */
 function bindObjectProps (
   data,
   tag,
@@ -3735,9 +3692,6 @@ function bindObjectProps (
 
 /*  */
 
-/**
- * Runtime helper for rendering static trees.
- */
 function renderStatic (
   index,
   isInFor
@@ -3933,7 +3887,6 @@ function mergeProps (to, from) {
 
 /*  */
 
-// hooks to be invoked on component VNodes during patch
 var componentVNodeHooks = {
   init: function init (
     vnode,
@@ -4484,6 +4437,7 @@ function resolveConstructorOptions (Ctor) {
       }
     }
   }
+
   return options
 }
 
@@ -4890,8 +4844,6 @@ Vue$3.version = '2.5.0';
 
 /*  */
 
-// these are reserved for web because they are directly compiled away
-// during template compilation
 var isReservedAttr = makeMap('style,class');
 
 // attributes that should be using props for binding
@@ -5088,9 +5040,6 @@ var isTextInputType = makeMap('text,number,password,search,email,tel,url');
 
 /*  */
 
-/**
- * Query an element selector if it's not an element already.
- */
 function query (el) {
   if (typeof el === 'string') {
     var selected = document.querySelector(el);
@@ -6162,7 +6111,10 @@ var klass = {
 /*  */
 
 var validDivisionCharRE = /[\w).+\-_$\]]/;
-
+/**
+ * exp 如 {{msg + 265}} 中的 msg + 265
+ * v-model="msg" 中的 msg
+ */
 function parseFilters (exp) {
   var inSingle = false;
   var inDouble = false;
@@ -6173,11 +6125,15 @@ function parseFilters (exp) {
   var paren = 0;
   var lastFilterIndex = 0;
   var c, prev, i, expression, filters;
-
+  console.log(exp, 'row expression 在解析里面');
   for (i = 0; i < exp.length; i++) {
     prev = c;
     c = exp.charCodeAt(i);
     if (inSingle) {
+      // 0x5C '\\'
+      // 0x22 '"'
+      // 0x2f '/'
+      // 0x7C '|'
       if (c === 0x27 && prev !== 0x5C) { inSingle = false; }
     } else if (inDouble) {
       if (c === 0x22 && prev !== 0x5C) { inDouble = false; }
@@ -6241,7 +6197,7 @@ function parseFilters (exp) {
       expression = wrapFilter(expression, filters[i]);
     }
   }
-
+  console.log(expression, '表达式');
   return expression
 }
 
@@ -6365,14 +6321,18 @@ function getBindingAttr (
 // doesn't get processed by processAttrs.
 // By default it does NOT remove it from the map (attrsMap) because the map is
 // needed during codegen.
+/**
+ * 找到attrsMap属性， 删除attrsList中的属性
+ */
 function getAndRemoveAttr (
   el,
   name,
   removeFromMap
 ) {
   var val;
-  if ((val = el.attrsMap[name]) != null) {
+  if ((val = el.attrsMap[name]) != null) { // 找到
     var list = el.attrsList;
+    // 删除
     for (var i = 0, l = list.length; i < l; i++) {
       if (list[i].name === name) {
         list.splice(i, 1);
@@ -6694,10 +6654,6 @@ function genDefaultModel (
 
 /*  */
 
-// normalize v-model event tokens that can only be determined at runtime.
-// it's important to place the event as the first in the array because
-// the whole point is ensuring the v-model callback gets called before
-// user-attached handlers.
 function normalizeEvents (on) {
   /* istanbul ignore if */
   if (isDef(on[RANGE_TOKEN])) {
@@ -7578,8 +7534,6 @@ var platformModules = [
 
 /*  */
 
-// the directive module should be applied last, after all
-// built-in modules have been applied.
 var modules = platformModules.concat(baseModules);
 
 var patch = createPatchFunction({ nodeOps: nodeOps, modules: modules });
@@ -7589,7 +7543,6 @@ var patch = createPatchFunction({ nodeOps: nodeOps, modules: modules });
  * properties to Elements.
  */
 
-/* istanbul ignore if */
 if (isIE9) {
   // http://www.matts411.com/post/internet-explorer-9-oninput/
   document.addEventListener('selectionchange', function () {
@@ -7719,7 +7672,6 @@ function trigger (el, type) {
 
 /*  */
 
-// recursively search for possible transition defined inside the component root
 function locateNode (vnode) {
   return vnode.componentInstance && (!vnode.data || !vnode.data.transition)
     ? locateNode(vnode.componentInstance._vnode)
@@ -8145,7 +8097,6 @@ var platformComponents = {
 
 /*  */
 
-// install platform specific utils
 Vue$3.config.mustUseProp = mustUseProp;
 Vue$3.config.isReservedTag = isReservedTag;
 Vue$3.config.isReservedAttr = isReservedAttr;
@@ -8195,7 +8146,6 @@ Vue$3.nextTick(function () {
 
 /*  */
 
-// check whether current browser encodes a char inside attribute values
 function shouldDecode (content, encoded) {
   var div = document.createElement('div');
   div.innerHTML = "<div a=\"" + content + "\"/>";
@@ -8242,6 +8192,7 @@ function parseText (
   if (lastIndex < text.length) {
     tokens.push(JSON.stringify(text.slice(lastIndex)));
   }
+  // console.log(tokens, '是不是存在token')
   return tokens.join('+')
 }
 
@@ -8249,6 +8200,7 @@ function parseText (
 
 function transformNode (el, options) {
   var warn = options.warn || baseWarn;
+  // staticClass 获取到class表达式 如 class='hd-{{num}}' 中的 'hd-{{num}}'
   var staticClass = getAndRemoveAttr(el, 'class');
   if ("development" !== 'production' && staticClass) {
     var expression = parseText(staticClass, options.delimiters);
@@ -8377,7 +8329,6 @@ var isNonPhrasingTag = makeMap(
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-// Regular Expressions for parsing tags and attributes
 var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
 // but for Vue templates we can enforce a simple charset
@@ -8427,6 +8378,7 @@ function parseHTML (html, options) {
   var last, lastTag;
   while (html) {
     last = html;
+    // console.log(last)
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
       var textEnd = html.indexOf('<');
@@ -8462,6 +8414,7 @@ function parseHTML (html, options) {
         }
 
         // End tag:
+        // endTag reg 当前字符串是否是尾标签
         var endTagMatch = html.match(endTag);
         if (endTagMatch) {
           var curIndex = index;
@@ -8485,10 +8438,10 @@ function parseHTML (html, options) {
       if (textEnd >= 0) {
         rest = html.slice(textEnd);
         while (
-          !endTag.test(rest) &&
-          !startTagOpen.test(rest) &&
-          !comment.test(rest) &&
-          !conditionalComment.test(rest)
+          !endTag.test(rest) && // 不是结束标签
+          !startTagOpen.test(rest) && // 不是开放标签
+          !comment.test(rest) && // 不是注释标签
+          !conditionalComment.test(rest) // 不是适配注释
         ) {
           // < in plain text, be forgiving and treat it as text
           next = rest.indexOf('<', 1);
@@ -8551,6 +8504,7 @@ function parseHTML (html, options) {
 
   function parseStartTag () {
     var start = html.match(startTagOpen);
+    // console.log(start, ' parseStartTag 匹配到的开始标签 ')
     if (start) {
       var match = {
         tagName: start[1],
@@ -8559,14 +8513,19 @@ function parseHTML (html, options) {
       };
       advance(start[0].length);
       var end, attr;
+      // console.log(html, '越过之前的inde')
+      // end 开始标签的结束位置
       while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
         advance(attr[0].length);
         match.attrs.push(attr);
       }
+
       if (end) {
+        // console.log(end, '匹配到的end')
         match.unarySlash = end[1];
         advance(end[0].length);
         match.end = index;
+        // console.log(match, 'match 匹配到的标签结构')
         return match
       }
     }
@@ -8575,7 +8534,8 @@ function parseHTML (html, options) {
   function handleStartTag (match) {
     var tagName = match.tagName;
     var unarySlash = match.unarySlash;
-
+    // console.log(expectHTML, 'expectHTML')
+    // expectHTML true
     if (expectHTML) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag);
@@ -8593,11 +8553,13 @@ function parseHTML (html, options) {
       var args = match.attrs[i];
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
+        // args[3] => 'id'，args[4] => '='，args[5] => 'app'
         if (args[3] === '') { delete args[3]; }
         if (args[4] === '') { delete args[4]; }
         if (args[5] === '') { delete args[5]; }
       }
       var value = args[3] || args[4] || args[5] || '';
+      // attrs[i] = [{name:'id',value:'app'},{name:'class',value:'hd'}]
       attrs[i] = {
         name: args[1],
         value: decodeAttr(
@@ -8613,8 +8575,15 @@ function parseHTML (html, options) {
     }
 
     if (options.start) {
+      /**
+       * tagName div span……
+       * attrs  [{name:'id',value:'app'},{name:'class',value:'hd'}]
+       * unary 单标签
+       */
+      // console.log(attrs, ' 开始标签的属性的数据结构 ')
       options.start(tagName, attrs, unary, match.start, match.end);
     }
+    // console.log(JSON.stringify(stack))
   }
 
   function parseEndTag (tagName, start, end) {
@@ -8628,6 +8597,7 @@ function parseHTML (html, options) {
 
     // Find the closest opened tag of the same type
     if (tagName) {
+      console.log(JSON.stringify(stack), '处理endtag函数');
       for (pos = stack.length - 1; pos >= 0; pos--) {
         if (stack[pos].lowerCasedTag === lowerCasedTagName) {
           break
@@ -8704,9 +8674,9 @@ function createASTElement (
 ) {
   return {
     type: 1,
-    tag: tag,
-    attrsList: attrs,
-    attrsMap: makeAttrsMap(attrs),
+    tag: tag, // div span
+    attrsList: attrs, // 属性的数组对象表示 [{name:'id',value:'app'}]
+    attrsMap: makeAttrsMap(attrs), // {id:'app',class:'hd'}
     parent: parent,
     children: []
   }
@@ -8725,6 +8695,9 @@ function parse (
   platformMustUseProp = options.mustUseProp || no;
   platformGetTagNamespace = options.getTagNamespace || no;
 
+  /**
+   * 三个函数，分别处理 clss表达式、style表达式、v-model表达式
+   */
   transforms = pluckModuleFunction(options.modules, 'transformNode');
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
@@ -9007,6 +8980,7 @@ function processFor (el) {
       );
       return
     }
+    console.log();
     el.for = inMatch[2].trim();
     var alias = inMatch[1].trim();
     var iteratorMatch = alias.match(forIteratorRE);
@@ -10135,8 +10109,6 @@ function transformSpecialNewlines (text) {
 
 /*  */
 
-// these keywords should not appear inside expressions, but operators like
-// typeof, instanceof and in are allowed
 var prohibitedKeywordRE = new RegExp('\\b' + (
   'do,if,for,let,new,try,var,case,else,with,await,break,catch,class,const,' +
   'super,throw,while,yield,delete,export,import,return,switch,default,' +
@@ -10385,9 +10357,6 @@ function createCompilerCreator (baseCompile) {
 
 /*  */
 
-// `createCompilerCreator` allows creating compilers that use alternative
-// parser/optimizer/codegen, e.g the SSR optimizing compiler.
-// Here we just export a default compiler using the default parts.
 var createCompiler = createCompilerCreator(function baseCompile (
   template,
   options
@@ -10461,7 +10430,12 @@ Vue$3.prototype.$mount = function (
       if ("development" !== 'production' && config.performance && mark) {
         mark('compile');
       }
-
+      /**
+       * template 模板字符串
+       * shouldDecodeNewlines 非ie为false
+       * delimiters 分界符
+       * comments 注释
+       */
       var ref = compileToFunctions(template, {
         shouldDecodeNewlines: shouldDecodeNewlines,
         delimiters: options.delimiters,
@@ -10501,3 +10475,4 @@ Vue$3.compile = compileToFunctions;
 return Vue$3;
 
 })));
+//# sourceMappingURL=vue.js.map

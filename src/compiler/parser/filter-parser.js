@@ -1,7 +1,10 @@
 /* @flow */
 
 const validDivisionCharRE = /[\w).+\-_$\]]/
-
+/**
+ * exp 如 {{msg + 265}} 中的 msg + 265
+ * v-model="msg" 中的 msg
+ */
 export function parseFilters (exp: string): string {
   let inSingle = false
   let inDouble = false
@@ -12,11 +15,15 @@ export function parseFilters (exp: string): string {
   let paren = 0
   let lastFilterIndex = 0
   let c, prev, i, expression, filters
-
+  console.log(exp, 'row expression 在解析里面')
   for (i = 0; i < exp.length; i++) {
     prev = c
     c = exp.charCodeAt(i)
     if (inSingle) {
+      // 0x5C '\\'
+      // 0x22 '"'
+      // 0x2f '/'
+      // 0x7C '|'
       if (c === 0x27 && prev !== 0x5C) inSingle = false
     } else if (inDouble) {
       if (c === 0x22 && prev !== 0x5C) inDouble = false
@@ -80,7 +87,7 @@ export function parseFilters (exp: string): string {
       expression = wrapFilter(expression, filters[i])
     }
   }
-
+  console.log(expression, '表达式')
   return expression
 }
 

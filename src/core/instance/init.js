@@ -109,6 +109,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       }
     }
   }
+
   return options
 }
 

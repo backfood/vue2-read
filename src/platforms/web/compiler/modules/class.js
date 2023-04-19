@@ -9,6 +9,7 @@ import {
 
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
+  // staticClass 获取到class表达式 如 class='hd-{{num}}' 中的 'hd-{{num}}'
   const staticClass = getAndRemoveAttr(el, 'class')
   if (process.env.NODE_ENV !== 'production' && staticClass) {
     const expression = parseText(staticClass, options.delimiters)

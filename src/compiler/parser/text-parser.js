@@ -37,5 +37,6 @@ export function parseText (
   if (lastIndex < text.length) {
     tokens.push(JSON.stringify(text.slice(lastIndex)))
   }
+  // console.log(tokens, '是不是存在token')
   return tokens.join('+')
 }

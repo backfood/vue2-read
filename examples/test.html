@@ -1,0 +1,126 @@
+<!-- eslint-disable new-cap -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Vue 源码解读</title>
+</head>
+<style>
+  .title {
+    color: rgb(180, 226, 211);
+  }
+
+  .title::after {
+    content: 0x27;
+    color: rgb(20, 29, 4);
+  }
+</style>
+
+<body>
+  <!-- <div>{{msg2}}</div>
+    <div>{{msg3}}</div>
+    <div>{{msg4}}</div> -->
+  <!-- <div><button @click="addNum">{{num}}</button></div> -->
+  <!-- <div> 计算属性 {{com1}}</div> -->
+  <!-- <button-counter></button-counter> -->
+  <div id="app">
+    <div @click="setMsgVal" class="title">{{msg + 265 + 'text row'}}</div>
+    <div v-for="t of msg ">{{t}}</div>
+    <input type="text" v-model="msg" />
+    <br />
+  </div>
+  <script src="../dist/vue.js"></script>
+  <script defer>
+    // eslint-disable-next-line no-undef
+
+    Vue.component('button-counter', {
+      data() {
+        return {
+          count: 0
+        }
+      },
+      template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+    })
+
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          msg: 'hello vue',
+          msg2: 'msg2 test queue wachter'
+          // msg3: 'msg2 test queue wachter',
+          // msg4: 'msg2 test queue wachter',
+          // num: 0
+        }
+      },
+      computed: {
+        com1() {
+          return this.msg2 + this.msg
+        }
+      },
+      methods: {
+        setMsgVal() {
+          // this.msg = 'hello vue from father val change'
+          this.msg = ' from father val change'
+          // this.msg3 = ' from father val change'
+          // this.msg4 = ' from father val change'
+        },
+        addNum() {
+          this.num++
+        }
+      }
+    })
+
+  </script>
+  <script>
+    // const text = 'this is {{name}} buy {{goods}},in {{store}}'
+    // const tagRE = /\{\{((?:.|\n)+?)\}\}/g
+    // let match = tagRE.exec(text)
+    // console.log(match)
+    // text.slice(0, 8)
+    // match = tagRE.exec(text)
+    // console.log(text)
+    // console.log(match)
+
+    // const Child = function () { }
+    // Child.toFunc = function () {
+    //   console.log(12414)
+    // }
+
+    // const Parent = function (Child) {
+    //   this.a = 10
+    //   Child.prototype.Fun = function () {
+    //     this.b = 30
+    //   }
+    // }
+    // Parent(Child)
+    // const Ins = new Parent(Child)
+
+    // const ChildIns = new Child()
+    // Child.toFunc()
+    // const childFunIns = new ChildIns.Fun()
+    // console.log(Child.constructor)
+    // console.log(Parent.b)
+    // console.log(Ins.a)
+    // console.log(childFunIns.b)
+    // console.log(ChildIns.toFunc)
+    // console.log(ChildIns.Fun)
+    // const arr1 = [{
+    //   a: 10, b: 20, c: { num: 30 }
+    // }]
+    // const arr2 = arr1.slice()
+    // arr1[0].a = 1000
+    // console.log(arr2)
+    // const rex = /\\w/
+    // console.log('abc\ndef')
+    // const ncname = '[a-zA-Z_][\\w\\-\\.]*'
+    // const qnameCapture = `((?:${ncname}\\:)?${ncname})`
+    // const startTagOpen = new RegExp(`^<${qnameCapture}`)
+    // const startTagClose = /^\s*(\/?)>/
+    // const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
+    // console.log('</div>'.match(endTag))
+  </script>
+</body>
+
+</html>
