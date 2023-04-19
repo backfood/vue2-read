@@ -8980,7 +8980,7 @@ function processFor (el) {
       );
       return
     }
-    console.log();
+    console.log(inMatch,'匹配到的');
     el.for = inMatch[2].trim();
     var alias = inMatch[1].trim();
     var iteratorMatch = alias.match(forIteratorRE);

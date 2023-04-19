@@ -121,6 +121,33 @@
     // const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
     // console.log('</div>'.match(endTag))
   </script>
+  <script>
+    /** 防抖与节流 */
+    function throttle(func, time) {
+      let date = 0
+      return function () {
+        const now = new Date().getTime()
+        if ((now - date) > time) {
+          func()
+          date = now
+        }
+      }
+    }
+    const debounce = function (func, time) {
+      let date = 0
+      return function () {
+        const now = new Date().getTime()
+        if ((now - date) > time) {
+          func()
+        }
+        date = now
+      }
+    }
+    const instance = throttle(function () { console.log('throttle') }, 1000)
+    const instanceDebounce = debounce(function () { console.log('debounce') }, 1000)
+    document.getElementById('app').onclick = instanceDebounce
+  </script>
+  
 </body>
 
 </html>
