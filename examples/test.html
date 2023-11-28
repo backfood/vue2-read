@@ -147,7 +147,49 @@
     const instanceDebounce = debounce(function () { console.log('debounce') }, 1000)
     document.getElementById('app').onclick = instanceDebounce
   </script>
-  
+  <script>
+    // 手写 Promise https://juejin.cn/post/7222531019320426551?searchId=20231128215946981AFA99D5E7E5BB22C0
+    class Pro {
+      data = ''
+      constructor (callBack) {
+        this.status = 'padding'
+        this.data = ''
+        this.err = ''
+        const resolve = (data) => {
+          if (this.status === 'padding') {
+            this.status = 'resolve'
+            this.data = data
+          }
+        }
+        const reject = err => {
+          if (this.status === 'padding') {
+            this.status = 'reject'
+            this.err = err
+          }
+        }
+        try {
+          callBack(resolve, reject)
+        } catch (e) {
+          reject(e)
+        }
+      }
+
+      then(resolveFun,rejectFun) {
+
+        resolveFun(this.data)
+
+        return new Pro((resolve,reject)=>{
+
+        })
+      }
+    }
+    const res = new Pro((resolve, reject) => {
+      resolve('23456432')
+    })
+   res.then(data=>console.log(data))
+    // console.log(res.then(data=>{}))
+
+  </script>
 </body>
 
 </html>
